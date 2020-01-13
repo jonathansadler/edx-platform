@@ -318,6 +318,21 @@ class CourseEndDate(DateSummary):
                 )
 
 
+class CourseAssignmentDate(DateSummary):
+    def __init__(self, course, user, assignment_date, assignment_title, course_id=None):
+        super().__init__(course, user, course_id)
+        self.assignment_date = assignment_date
+        self.assignment_title = assignment_title
+
+    @property
+    def date(self):
+        return self.assignment_date
+
+    @property
+    def title(self):
+        return self.assignment_title
+
+
 class CertificateAvailableDate(DateSummary):
     """
     Displays the certificate available date of the course.

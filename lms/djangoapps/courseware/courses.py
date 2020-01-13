@@ -15,6 +15,7 @@ from django.conf import settings
 from django.db.models import Prefetch
 from django.http import Http404, QueryDict
 from django.urls import reverse
+from edx_when.api import get_dates_for_course
 from fs.errors import ResourceNotFound
 from opaque_keys.edx.keys import UsageKey
 from path import Path as path
@@ -26,6 +27,7 @@ from lms.djangoapps.courseware.access import has_access
 from lms.djangoapps.courseware.access_response import MilestoneAccessError, StartDateError
 from lms.djangoapps.courseware.date_summary import (
     CertificateAvailableDate,
+    CourseAssignmentDate,
     CourseEndDate,
     CourseStartDate,
     TodaysDate,
@@ -389,7 +391,7 @@ def get_course_info_section(request, user, course, section_key):
     return html
 
 
-def get_course_date_blocks(course, user):
+def get_course_date_blocks(course, user, request=None):
     """
     Return the list of blocks to display on the course info page,
     sorted by date.
@@ -404,7 +406,8 @@ def get_course_date_blocks(course, user):
     if certs_api.get_active_web_certificate(course):
         block_classes.insert(0, CertificateAvailableDate)
 
-    blocks = (cls(course, user) for cls in block_classes)
+    blocks = [cls(course, user) for cls in block_classes]
+    blocks.extend(get_course_assignment_due_dates(course, user))
 
     def block_key_fn(block):
         """
@@ -415,6 +418,18 @@ def get_course_date_blocks(course, user):
             return datetime.max.replace(tzinfo=pytz.UTC)
         return block.date
     return sorted((b for b in blocks if b.is_enabled), key=block_key_fn)
+
+
+def get_course_assignment_due_dates(course, user):
+    store = modulestore()
+    all_course_dates = get_dates_for_course(course.id, user)
+    date_blocks = []
+    for (block_key, date_type), date in all_course_dates.items():
+        if date_type == 'due':
+            item = store.get_item(block_key)
+            if item.category == 'sequential' and item.graded:
+                date_blocks.append(CourseAssignmentDate(course, user, date, item.display_name))
+    return date_blocks
 
 
 # TODO: Fix this such that these are pulled in as extra course-specific tabs.
