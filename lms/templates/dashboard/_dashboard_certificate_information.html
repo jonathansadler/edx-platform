@@ -46,9 +46,11 @@ else:
   % else:
     <div class="message message-status ${status_css_class} is-shown">
       <p class="message-copy">
-        % if should_display_grade(course_overview.end):
+        % if should_display_grade(course_overview):
             ${_("Your final grade:")}
             <span class="grade-value">${"{0:.0f}%".format(float(cert_status['grade'])*100)}</span>.
+        % else:
+            ${_("Final grades will be displayed after course end")}
         % endif
         % if cert_status['status'] == 'notpassing':
           % if enrollment.mode != 'audit':
