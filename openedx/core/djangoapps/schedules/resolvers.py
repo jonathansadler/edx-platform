@@ -255,6 +255,8 @@ class RecurringNudgeResolver(BinnedSchedulesBaseResolver):
 
     def get_template_context(self, user, user_schedules):
         first_schedule = user_schedules[0]
+        if not first_schedule.enrollment.course.self_paced:
+            raise InvalidContextError
         context = {
             'course_name': first_schedule.enrollment.course.display_name,
             'course_url': _get_trackable_course_home_url(first_schedule.enrollment.course_id),
@@ -287,6 +289,10 @@ class UpgradeReminderResolver(BinnedSchedulesBaseResolver):
         first_valid_upsell_context = None
         first_schedule = None
         for schedule in user_schedules:
+            if not schedule.enrollment.course.self_paced:
+                # We don't want to include instructor led courses in this email
+                continue
+
             upsell_context = _get_upsell_information_for_schedule(user, schedule)
             if not upsell_context['show_upsell']:
                 continue
