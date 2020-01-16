@@ -198,20 +198,16 @@ class BinnedSchedulesBaseResolver(PrefixedDebugLoggerMixin, RecipientResolver):
             user_schedules = list(user_schedules)
             course_id_strs = [str(schedule.enrollment.course_id) for schedule in user_schedules]
 
-            first_schedule = user_schedules[0]
-            course = first_schedule.enrollment.course
-            if not course.self_paced:
-                continue
-
             # This is used by the bulk email optout policy
             template_context['course_ids'] = course_id_strs
 
+            first_schedule = user_schedules[0]
             try:
                 template_context.update(self.get_template_context(user, user_schedules))
             except InvalidContextError:
                 continue
 
-            yield (user, course.closest_released_language, template_context)
+            yield (user, first_schedule.enrollment.course.closest_released_language, template_context)
 
     def get_template_context(self, user, user_schedules):
         """
