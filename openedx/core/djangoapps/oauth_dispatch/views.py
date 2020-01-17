@@ -13,7 +13,7 @@ from edx_oauth2_provider import views as dop_views  # django-oauth2-provider vie
 from oauth2_provider import models as dot_models  # django-oauth-toolkit
 from oauth2_provider import views as dot_views
 from ratelimit import ALL
-from ratelimit.mixins import RatelimitMixin
+from ratelimit.decorators import ratelimit
 
 from openedx.core.djangoapps.auth_exchange import views as auth_exchange_views
 from openedx.core.djangoapps.oauth_dispatch import adapters
@@ -84,7 +84,7 @@ class _DispatchingView(View):
             return request.POST.get('client_id')
 
 
-class AccessTokenView(RatelimitMixin, _DispatchingView):
+class AccessTokenView(_DispatchingView):
     """
     Handle access token requests.
     """
@@ -95,6 +95,7 @@ class AccessTokenView(RatelimitMixin, _DispatchingView):
     ratelimit_block = True
     ratelimit_method = ALL
 
+    @ratelimit(key=ratelimit_key, rate=ratelimit_rate, method=ratelimit_method, block=ratelimit_block)
     def dispatch(self, request, *args, **kwargs):  # pylint: disable=arguments-differ
         response = super(AccessTokenView, self).dispatch(request, *args, **kwargs)
 
