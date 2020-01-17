@@ -270,11 +270,11 @@
      * Event handler to exit from fullscreen mode.
      * @param {jquery Event} event
      */
-    function exitHandler(event) {
-        if ((this.isFullScreen) && (event.keyCode === 27)) {
-            event.preventDefault();
-            this.videoCommands.execute('toggleFullScreen');
+        function exitHandler(event) {
+            if ((this.isFullScreen) && (event.keyCode === 27)) {
+                event.preventDefault();
+                this.videoCommands.execute('toggleFullScreen');
+            }
         }
-    }
     });
 }(RequireJS.define));
