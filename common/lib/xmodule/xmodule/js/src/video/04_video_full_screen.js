@@ -75,11 +75,15 @@
         }
 
         function _exitFullscreen() {
-            return document[_getVendorPrefixed('exitFullscreen')]();
+            if (document[_getVendorPrefixed('exitFullscreen')]) {
+                return document[_getVendorPrefixed('exitFullscreen')]();
+            }
         }
 
         function _requestFullscreen(element, options) {
-            return element[_getVendorPrefixed('requestFullscreen')](options);
+            if (element[_getVendorPrefixed('requestFullscreen')]) {
+                return element[_getVendorPrefixed('requestFullscreen')](options);
+            }
         }
 
     // VideoControl() function - what this module "exports".
@@ -109,6 +113,7 @@
                 destroy: destroy,
                 enter: enter,
                 exit: exit,
+                exitHandler: exitHandler,
                 handleExit: handleExit,
                 handleEnter: handleEnter,
                 handleFullscreenChange: handleFullscreenChange,
@@ -121,6 +126,7 @@
         }
 
         function destroy() {
+            $(document).off('keyup', this.videoFullScreen.exitHandler);
             this.videoFullScreen.fullScreenEl.remove();
             this.el.off({
                 destroy: this.videoFullScreen.destroy
@@ -156,6 +162,7 @@
             state.el.on({
                 destroy: state.videoFullScreen.destroy
             });
+            $(document).on('keyup', state.videoFullScreen.exitHandler);
             document.addEventListener(
                 _getVendorPrefixed('fullscreenchange'),
                 state.videoFullScreen.handleFullscreenChange,
@@ -173,10 +180,8 @@
     // ***************************************************************
 
         function handleFullscreenChange() {
-            if (_getFullscreenElement() === this.el[0]) {
-                this.videoFullScreen.handleEnter();
-            } else if (this.isFullScreen) {
-                // The video was fullscreen so this event must related to this video
+            if (_getFullscreenElement() !== this.el[0] && this.isFullScreen) {
+                // The video was fullscreen so this event must relate to this video
                 this.videoFullScreen.handleExit();
             }
         }
@@ -198,6 +203,9 @@
         }
 
         function handleExit() {
+            if (this.isFullScreen === false) {
+                return;
+            }
             var fullScreenClassNameEl = this.el.add(document.documentElement),
                 closedCaptionsEl = this.el.find('.closed-captions');
 
@@ -216,6 +224,9 @@
         }
 
         function handleEnter() {
+            if (this.isFullScreen === true) {
+                return;
+            }
             var fullScreenClassNameEl = this.el.add(document.documentElement),
                 closedCaptionsEl = this.el.find('.closed-captions');
 
@@ -237,11 +248,13 @@
             if (_getFullscreenElement() === this.el[0]) {
                 _exitFullscreen();
             }
+            this.videoFullScreen.handleExit();
         }
 
         function enter() {
             this.scrollPos = $(window).scrollTop();
             _requestFullscreen(this.el[0]);
+            this.videoFullScreen.handleEnter();
         }
 
     /** Toggle fullscreen mode. */
@@ -252,5 +265,16 @@
                 this.videoFullScreen.enter();
             }
         }
+
+    /**
+     * Event handler to exit from fullscreen mode.
+     * @param {jquery Event} event
+     */
+    function exitHandler(event) {
+        if ((this.isFullScreen) && (event.keyCode === 27)) {
+            event.preventDefault();
+            this.videoCommands.execute('toggleFullScreen');
+        }
+    }
     });
 }(RequireJS.define));
