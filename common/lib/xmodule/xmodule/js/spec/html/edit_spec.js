@@ -48,6 +48,10 @@ describe('HTMLEditingDescriptor', function() {
       const savedContent = this.descriptor.getVisualEditor().getContent()
       expect(savedContent).toEqual(expectedData);
     });
+    it('Correct base URL generation', function(){
+      const editor = this.descriptor.getVisualEditor();
+      expect(editor.baseUrl).not.ToContain('//');
+    });
   });
   describe('Raw HTML Editor', function() {
     beforeEach(function() {
