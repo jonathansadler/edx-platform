@@ -86,7 +86,8 @@ define([
         });
 
         it('does not show actions for a user already in a team', function() {
-            var teamsView = createTopicTeamsView({myTeamsCollection: TeamSpecHelpers.createMockTeams()});
+            var options = {myTeamsCollection: TeamSpecHelpers.createMockTeams()};
+            var teamsView = createTopicTeamsView(options);
             verifyActions(teamsView, {showActions: false});
         });
 
@@ -96,24 +97,26 @@ define([
         });
 
         it('shows actions for a privileged user already in a team', function() {
-            var teamsView = createTopicTeamsView({
+            var options = {
                 userInfo: {
                     privileged: true,
                     staff: false,
-                }
+                },
                 myTeamsCollection: TeamSpecHelpers.createMockTeams(),
-            });
+            };
+            var teamsView = createTopicTeamsView(options);
             verifyActions(teamsView, {showActions: true});
         });
 
         it('shows actions for a staff user already in a team', function() {
-            var teamsView = createTopicTeamsView({
+            var options = {
                 userInfo: {
                     privileged: false,
                     staff: true,
-                }
+                },
                 myTeamsCollection: TeamSpecHelpers.createMockTeams(),
-            });
+            };
+            var teamsView = createTopicTeamsView(options);
             verifyActions(teamsView, {showActions: true});
         });
 
