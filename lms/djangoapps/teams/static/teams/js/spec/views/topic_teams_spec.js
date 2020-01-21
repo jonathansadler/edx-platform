@@ -91,18 +91,30 @@ define([
         });
 
         it('does not show actions for a student in an instructor managed topic', function() {
-            var teamsView = createTopicTeamsView({privileged: false}, true);
+            var teamsView = createTopicTeamsView({}, true);
             verifyActions(teamsView, {showActions: false});
         });
 
         it('shows actions for a privileged user already in a team', function() {
-            var teamsView = createTopicTeamsView({privileged: true});
-            verifyActions(teamsView);
+            var teamsView = createTopicTeamsView({
+                userInfo: {
+                    privileged: true,
+                    staff: false,
+                }
+                myTeamsCollection: TeamSpecHelpers.createMockTeams(),
+            });
+            verifyActions(teamsView, {showActions: true});
         });
 
         it('shows actions for a staff user already in a team', function() {
-            var teamsView = createTopicTeamsView({privileged: false, staff: true});
-            verifyActions(teamsView);
+            var teamsView = createTopicTeamsView({
+                userInfo: {
+                    privileged: false,
+                    staff: true,
+                }
+                myTeamsCollection: TeamSpecHelpers.createMockTeams(),
+            });
+            verifyActions(teamsView, {showActions: true});
         });
 
         /*
