@@ -221,6 +221,7 @@
             $(closedCaptionsEl).css({ top: '70%', left: '5%' });
 
             this.resizer.delta.reset().setMode('width');
+            this.el.trigger('fullscreen', [this.isFullScreen]);
         }
 
         function handleEnter() {
@@ -242,27 +243,29 @@
 
             var height = this.videoFullScreen.updateControlsHeight();
             this.resizer.delta.substract(height, 'height').setMode('both');
+            this.el.trigger('fullscreen', [this.isFullScreen]);
         }
 
         function exit() {
-            if (_getFullscreenElement() === this.el[0]) {
-                _exitFullscreen();
-            }
             this.videoFullScreen.handleExit();
+            if (_getFullscreenElement() === this.el[0]) {
+               return _exitFullscreen();
+            }
+            return Promise.resolve();
         }
 
         function enter() {
             this.scrollPos = $(window).scrollTop();
-            _requestFullscreen(this.el[0]);
             this.videoFullScreen.handleEnter();
+            return _requestFullscreen(this.el[0]);
         }
 
     /** Toggle fullscreen mode. */
         function toggle() {
             if (this.videoFullScreen.fullScreenState) {
-                this.videoFullScreen.exit();
+                return this.videoFullScreen.exit();
             } else {
-                this.videoFullScreen.enter();
+                return this.videoFullScreen.enter();
             }
         }
 

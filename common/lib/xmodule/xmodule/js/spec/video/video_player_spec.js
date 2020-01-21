@@ -712,11 +712,12 @@ function(VideoPlayer, HLS, _) {
 
         describe('toggleFullScreen', function() {
             describe('when the video player is not full screen', function() {
-                beforeEach(function() {
+                beforeEach(async function() {
                     state = jasmine.initializePlayer();
                     state.videoEl = $('video, iframe');
                     spyOn($.fn, 'trigger').and.callThrough();
                     $('.add-fullscreen').click();
+                    await state.videoFullScreen.enter();
                 });
 
                 it('add the video-fullscreen class', function() {
@@ -728,18 +729,18 @@ function(VideoPlayer, HLS, _) {
                     expect(state.resizer.setMode).toHaveBeenCalledWith('both');
                     expect(state.resizer.delta.substract).toHaveBeenCalled();
                 });
+                afterEach(async function() {
+                    await state.videoFullScreen.exit();
+                });
             });
 
             describe('when the video player already full screen', function() {
-                beforeEach(function() {
+                beforeEach(async function() {
                     state = jasmine.initializePlayer();
                     state.videoEl = $('video, iframe');
                     spyOn($.fn, 'trigger').and.callThrough();
-                    state.el.addClass('video-fullscreen');
-                    state.videoFullScreen.fullScreenState = true;
-                    state.videoFullScreen.isFullScreen = true;
-                    state.videoFullScreen.fullScreenEl.attr('title', 'Exit-fullscreen');
-                    $('.add-fullscreen').click();
+                    await state.videoFullScreen.enter();
+                    await state.videoFullScreen.exit();
                 });
 
                 it('remove the video-fullscreen class', function() {

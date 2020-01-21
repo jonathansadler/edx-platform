@@ -268,24 +268,37 @@
                 expect(menuItem).toHaveText('Mute');
             });
 
-            it('mouse left/right-clicking behaves as expected on go to Exit full browser menu item', function() {
+            it('mouse left/right-clicking behaves as expected on go to Exit full browser menu item', async function() {
                 var menuItem = menuItems.eq(2);
+
+                function createFullscreenPromise() {
+                    return new Promise((resolve) => {
+                        state.el.on('fullscreen', (event, isFullscreen) => {
+                            resolve(isFullscreen);
+                        })
+                    });
+                }
+
                 // Left-click on Fill browser
                 menuItem.click();
+                await createFullscreenPromise();
                 expect(state.isFullScreen).toBe(true);
                 expect(menuItem).toHaveText('Exit full browser');
                 openMenu();
                 // Left-click on Exit full browser
                 menuItem.click();
+                await createFullscreenPromise();
                 expect(state.isFullScreen).toBe(false);
                 expect(menuItem).toHaveText('Fill browser');
                 // Right-click on Fill browser
                 menuItem.trigger('contextmenu');
+                await createFullscreenPromise();
                 expect(state.isFullScreen).toBe(true);
                 expect(menuItem).toHaveText('Exit full browser');
                 openMenu();
                 // Right-click on Exit full browser
                 menuItem.trigger('contextmenu');
+                await createFullscreenPromise();
                 expect(state.isFullScreen).toBe(false);
                 expect(menuItem).toHaveText('Fill browser');
             });
